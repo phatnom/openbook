@@ -357,10 +357,25 @@
 
             async loadStats() {
                 try {
-                    const response = await fetch('/api/impact-stats');
-                    const data = await response.json();
-                    this.totalAnalyses = data.totalAnalyses || 0;
-                    this.totalRevenue = data.totalRevenue || 0;
+                    // Check if we're in local file mode (no server)
+                    if (window.location.protocol === 'file:') {
+                        // Use localStorage fallback for local testing
+                        const stored = localStorage.getItem('openbooks_impact');
+                        if (stored) {
+                            const data = JSON.parse(stored);
+                            this.totalAnalyses = data.totalAnalyses || 0;
+                            this.totalRevenue = data.totalRevenue || 0;
+                        } else {
+                            this.totalAnalyses = 0;
+                            this.totalRevenue = 0;
+                        }
+                    } else {
+                        // Use API when on a server
+                        const response = await fetch('/api/impact-stats');
+                        const data = await response.json();
+                        this.totalAnalyses = data.totalAnalyses || 0;
+                        this.totalRevenue = data.totalRevenue || 0;
+                    }
                     this.updateDisplay();
                 } catch (error) {
                     console.error('Failed to load impact stats:', error);
@@ -372,17 +387,31 @@
 
             async recordAnalysis(revenue) {
                 try {
-                    await fetch('/api/impact-stats', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ revenue }),
-                    });
-                    
-                    // Update local values after successful API call
-                    this.totalAnalyses += 1;
-                    this.totalRevenue += parseFloat(revenue);
+                    // Check if we're in local file mode (no server)
+                    if (window.location.protocol === 'file:') {
+                        // Use localStorage fallback for local testing
+                        this.totalAnalyses += 1;
+                        this.totalRevenue += parseFloat(revenue);
+                        const data = {
+                            totalAnalyses: this.totalAnalyses,
+                            totalRevenue: this.totalRevenue,
+                            lastUpdated: new Date().toISOString()
+                        };
+                        localStorage.setItem('openbooks_impact', JSON.stringify(data));
+                    } else {
+                        // Use API when on a server
+                        await fetch('/api/impact-stats', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ revenue }),
+                        });
+                        
+                        // Update local values after successful API call
+                        this.totalAnalyses += 1;
+                        this.totalRevenue += parseFloat(revenue);
+                    }
                     this.updateDisplay();
                 } catch (error) {
                     console.error('Failed to record analysis:', error);
@@ -403,7 +432,11 @@
                 const impactElement = document.getElementById('impactMetric');
                 if (impactElement) {
                     const businessesText = this.totalAnalyses === 1 ? 'small business' : 'small businesses';
-                    impactElement.innerHTML = `To date, OpenBooks has processed ${this.getFormattedRevenue()} in monthly revenue data from ${this.totalAnalyses} ${businessesText}.`;
+                    const revenue = this.totalRevenue || 0;
+                    const formattedRevenue = revenue >= 1000000 ? `$${(revenue / 1000000).toFixed(1)}M+` :
+                                         revenue >= 1000 ? `$${(revenue / 1000).toFixed(0)}K+` :
+                                         `$${revenue.toLocaleString()}+`;
+                    impactElement.innerHTML = `To date, OpenBooks has processed ${formattedRevenue} in monthly revenue data from ${this.totalAnalyses} ${businessesText}.`;
                 }
             }
         }
