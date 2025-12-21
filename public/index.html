@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Health Checker - Simple insights for small businesses</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --accent-hue: 220;
+            --accent-color: hsl(var(--accent-hue), 70%, 50%);
+            --accent-color-light: hsl(var(--accent-hue), 70%, 60%);
+            --accent-color-dark: hsl(var(--accent-hue), 70%, 40%);
+        }
+
+        .accent-bg {
+            background-color: var(--accent-color);
+        }
+        
+        .accent-bg-light {
+            background-color: var(--accent-color-light);
+        }
+        
+        .accent-bg-dark {
+            background-color: var(--accent-color-dark);
+        }
+        
+        .accent-text {
+            color: var(--accent-color);
+        }
+        
+        .accent-border {
+            border-color: var(--accent-color);
+        }
+
+        .dark {
+            --accent-color: hsl(var(--accent-hue), 70%, 60%);
+            --accent-color-light: hsl(var(--accent-hue), 70%, 70%);
+            --accent-color-dark: hsl(var(--accent-hue), 70%, 50%);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        .slide-up {
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        .scale-in {
+            animation: scaleIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from { 
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to { 
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .transition-all {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .dark .metric-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .health-good { background: linear-gradient(135deg, #10b981, #059669); }
+        .health-mixed { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .health-attention { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+        .chart-bar {
+            transition: all 0.3s ease-out;
+            min-height: 4px;
+            height: 20px;
+        }
+
+        .chart-bar:hover {
+            opacity: 0.8;
+            transform: scaleY(1.05);
+            transform-origin: bottom;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    <!-- Header -->
+    <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+        <div class="max-w-4xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 accent-bg rounded-lg flex items-center justify-center">
+                        <i data-lucide="trending-up" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold">OpenBooks</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="themeToggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
+                        <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                        <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Input Section -->
+        <section id="inputSection" class="fade-in">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+                <h2 class="text-3xl font-bold mb-2">Let's check your business health</h2>
+                <p class="text-gray-600 dark:text-gray-400 mb-8">Enter a few basic metrics to get clear, actionable insights about your business.</p>
+                
+                <form id="businessForm" class="space-y-6">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label for="revenue" class="block text-sm font-medium">Monthly Revenue ($)</label>
+                            <input type="number" id="revenue" required min="0" step="0.01" 
+                                   class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-opacity-50 accent-border transition-all"
+                                   placeholder="5,000">
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label for="expenses" class="block text-sm font-medium">Monthly Expenses ($)</label>
+                            <input type="number" id="expenses" required min="0" step="0.01"
+                                   class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-opacity-50 accent-border transition-all"
+                                   placeholder="3,000">
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label for="previousRevenue" class="block text-sm font-medium">Previous Month Revenue ($)</label>
+                            <input type="number" id="previousRevenue" required min="0" step="0.01"
+                                   class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-opacity-50 accent-border transition-all"
+                                   placeholder="4,500">
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label for="reviewCount" class="block text-sm font-medium">Customer Reviews Count</label>
+                            <input type="number" id="reviewCount" required min="0" step="1"
+                                   class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-opacity-50 accent-border transition-all"
+                                   placeholder="25">
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label for="reviewRating" class="block text-sm font-medium">Average Rating (1-5)</label>
+                            <input type="number" id="reviewRating" required min="1" max="5" step="0.1"
+                                   class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-opacity-50 accent-border transition-all"
+                                   placeholder="4.5">
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label for="industry" class="block text-sm font-medium text-gray-600 dark:text-gray-400">Industry (Optional)</label>
+                        <select id="industry" 
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-opacity-50 accent-border transition-all">
+                            <option value="">Select your industry (optional)</option>
+                            <option value="services">Services (consulting, tutoring, agencies, freelancers)</option>
+                            <option value="retail">Retail / E-commerce</option>
+                            <option value="hospitality">Hospitality (restaurants, cafés, food service)</option>
+                            <option value="local">Local businesses (gyms, salons, clinics, etc.)</option>
+                            <option value="digital">Digital / Online businesses</option>
+                            <option value="other">Other / Prefer not to say</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="w-full accent-bg text-white py-4 rounded-lg font-semibold hover-lift transition-all">
+                        Analyze My Business Health
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="resultsSection" class="hidden">
+            <!-- Health Score Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 slide-up">
+                <div class="text-center mb-8">
+                    <div id="healthScore" class="w-32 h-32 mx-auto rounded-full flex items-center justify-center text-white text-4xl font-bold mb-4 scale-in">
+                        <!-- Score will be inserted here -->
+                    </div>
+                    <h2 id="healthStatus" class="text-3xl font-bold mb-2"></h2>
+                    <p id="healthDescription" class="text-gray-600 dark:text-gray-400"></p>
+                </div>
+            </div>
+
+            <!-- Metrics Grid -->
+            <div class="grid md:grid-cols-3 gap-6 mb-8">
+                <div class="metric-card rounded-xl p-6 hover-lift transition-all slide-up" style="animation-delay: 0.1s">
+                    <div class="flex items-center justify-between mb-4">
+                        <i data-lucide="trending-up" class="w-8 h-8 accent-text"></i>
+                        <span id="growthIndicator" class="text-sm font-medium px-2 py-1 rounded-full"></span>
+                    </div>
+                    <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Revenue Growth</h3>
+                    <p id="growthRate" class="text-2xl font-bold"></p>
+                </div>
+
+                <div class="metric-card rounded-xl p-6 hover-lift transition-all slide-up" style="animation-delay: 0.2s">
+                    <div class="flex items-center justify-between mb-4">
+                        <i data-lucide="dollar-sign" class="w-8 h-8 accent-text"></i>
+                        <span id="profitIndicator" class="text-sm font-medium px-2 py-1 rounded-full"></span>
+                    </div>
+                    <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Profit Margin</h3>
+                    <p id="profitMargin" class="text-2xl font-bold"></p>
+                </div>
+
+                <div class="metric-card rounded-xl p-6 hover-lift transition-all slide-up" style="animation-delay: 0.3s">
+                    <div class="flex items-center justify-between mb-4">
+                        <i data-lucide="star" class="w-8 h-8 accent-text"></i>
+                        <span id="reviewIndicator" class="text-sm font-medium px-2 py-1 rounded-full"></span>
+                    </div>
+                    <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Customer Satisfaction</h3>
+                    <p id="reviewScore" class="text-2xl font-bold"></p>
+                </div>
+            </div>
+
+            <!-- Simple Chart -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 slide-up" style="animation-delay: 0.4s">
+                <h3 class="text-xl font-bold mb-6">Revenue Overview</h3>
+                <div class="h-48 flex items-end justify-center space-x-8">
+                    <div class="text-center">
+                        <div id="prevRevenueBar" class="w-24 chart-bar bg-gray-300 dark:bg-gray-600 rounded-t-lg"></div>
+                        <p class="text-sm mt-2 text-gray-600 dark:text-gray-400">Previous Month</p>
+                        <p id="prevRevenueLabel" class="font-semibold"></p>
+                    </div>
+                    <div class="text-center">
+                        <div id="currRevenueBar" class="w-24 chart-bar accent-bg rounded-t-lg"></div>
+                        <p class="text-sm mt-2 text-gray-600 dark:text-gray-400">Current Month</p>
+                        <p id="currRevenueLabel" class="font-semibold"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insights -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 slide-up" style="animation-delay: 0.5s">
+                <h3 class="text-xl font-bold mb-6">What This Means</h3>
+                <div id="insights" class="space-y-4">
+                    <!-- Insights will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 slide-up" style="animation-delay: 0.6s">
+                <h3 class="text-xl font-bold mb-6">What to Focus On</h3>
+                <div id="recommendations" class="space-y-4">
+                    <!-- Recommendations will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Next Steps -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 slide-up" style="animation-delay: 0.7s">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold">Next Steps</h3>
+                    <button id="toggleNextSteps" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                        <i data-lucide="chevron-up" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div id="nextStepsContent">
+                    <div id="nextSteps" class="space-y-4">
+                        <!-- Next steps will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <div class="text-center mt-8">
+                <button id="resetButton" class="accent-bg text-white px-8 py-3 rounded-lg font-semibold hover-lift transition-all">
+                    Start New Analysis
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer with Impact Metrics -->
+    <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-auto">
+        <div class="max-w-4xl mx-auto px-4 py-6">
+            <div class="text-center">
+                <p id="impactMetric" class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    Loading impact data...
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-500">
+                    Based on anonymized user input
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Theme management
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+
+        // Initialize theme - default to dark mode for each visit
+        html.classList.add('dark');
+
+        // Theme toggle handler
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            lucide.createIcons();
+        });
+
+        // Form and results elements
+        const businessForm = document.getElementById('businessForm');
+        const inputSection = document.getElementById('inputSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const resetButton = document.getElementById('resetButton');
+
+        // Redis-based impact tracking
+        class ImpactTracker {
+            constructor() {
+                this.loadStats();
+            }
+
+            async loadStats() {
+                try {
+                    const response = await fetch('/api/impact-stats');
+                    const data = await response.json();
+                    this.totalAnalyses = data.totalAnalyses || 0;
+                    this.totalRevenue = data.totalRevenue || 0;
+                    this.updateDisplay();
+                } catch (error) {
+                    console.error('Failed to load impact stats:', error);
+                    this.totalAnalyses = 0;
+                    this.totalRevenue = 0;
+                    this.updateDisplay();
+                }
+            }
+
+            async recordAnalysis(revenue) {
+                try {
+                    await fetch('/api/impact-stats', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ revenue }),
+                    });
+                    
+                    // Update local values after successful API call
+                    this.totalAnalyses += 1;
+                    this.totalRevenue += parseFloat(revenue);
+                    this.updateDisplay();
+                } catch (error) {
+                    console.error('Failed to record analysis:', error);
+                }
+            }
+
+            getFormattedRevenue() {
+                if (this.totalRevenue >= 1000000) {
+                    return `$${(this.totalRevenue / 1000000).toFixed(1)}M+`;
+                } else if (this.totalRevenue >= 1000) {
+                    return `$${(this.totalRevenue / 1000).toFixed(0)}K+`;
+                } else {
+                    return `$${this.totalRevenue.toLocaleString()}+`;
+                }
+            }
+
+            updateDisplay() {
+                const impactElement = document.getElementById('impactMetric');
+                if (impactElement) {
+                    const businessesText = this.totalAnalyses === 1 ? 'small business' : 'small businesses';
+                    impactElement.innerHTML = `To date, OpenBooks has processed ${this.getFormattedRevenue()} in monthly revenue data from ${this.totalAnalyses} ${businessesText}.`;
+                }
+            }
+        }
+
+        // Initialize impact tracker
+        const impactTracker = new ImpactTracker();
+
+        // Business calculation logic
+        class BusinessHealthCalculator {
+            constructor(data) {
+                this.revenue = parseFloat(data.revenue);
+                this.expenses = parseFloat(data.expenses);
+                this.previousRevenue = parseFloat(data.previousRevenue);
+                this.reviewCount = parseInt(data.reviewCount);
+                this.reviewRating = parseFloat(data.reviewRating);
+                this.industry = data.industry || '';
+            }
+
+            calculateGrowthRate() {
+                if (this.previousRevenue === 0) return 0;
+                return ((this.revenue - this.previousRevenue) / this.previousRevenue) * 100;
+            }
+
+            calculateProfitMargin() {
+                if (this.revenue === 0) return 0;
+                return ((this.revenue - this.expenses) / this.revenue) * 100;
+            }
+
+            calculateCustomerScore() {
+                // Rating should be the dominant factor - poor ratings should never be "excellent"
+                const ratingWeight = 0.9;
+                const countWeight = 0.1;
+                
+                // Normalize rating (0-1 scale) - this is the primary driver
+                const normalizedRating = this.reviewRating / 5;
+                
+                // Normalize review count (logarithmic scale, much smaller impact)
+                // Cap at 50 reviews to avoid excessive influence
+                const cappedReviewCount = Math.min(this.reviewCount, 50);
+                const normalizedCount = Math.log10(Math.max(1, cappedReviewCount)) / Math.log10(50);
+                
+                // If rating is below 3.0, cap the score regardless of review count
+                if (this.reviewRating < 3.0) {
+                    return Math.max(normalizedRating * 60, 20); // Max 60% for poor ratings
+                }
+                
+                return (normalizedRating * ratingWeight + normalizedCount * countWeight) * 100;
+            }
+
+            calculateOverallHealth() {
+                const growthScore = this.getGrowthScore();
+                const profitScore = this.getProfitScore();
+                const customerScore = this.calculateCustomerScore();
+                
+                // Weighted average
+                return (growthScore * 0.3 + profitScore * 0.4 + customerScore * 0.3);
+            }
+
+            getGrowthScore() {
+                const growth = this.calculateGrowthRate();
+                if (growth >= 10) return 100;
+                if (growth >= 5) return 80;
+                if (growth >= 0) return 60;
+                if (growth >= -5) return 40;
+                if (growth >= -10) return 20;
+                return 0;
+            }
+
+            getProfitScore() {
+                const margin = this.calculateProfitMargin();
+                if (margin >= 20) return 100;
+                if (margin >= 15) return 80;
+                if (margin >= 10) return 60;
+                if (margin >= 5) return 40;
+                if (margin >= 0) return 20;
+                return 0;
+            }
+
+            getHealthCategory(score) {
+                if (score >= 75) return { category: 'Good', class: 'health-good', description: 'Your business is showing strong signs of health' };
+                if (score >= 50) return { category: 'Mixed', class: 'health-mixed', description: 'Your business has strengths and areas to improve' };
+                return { category: 'Needs Attention', class: 'health-attention', description: 'Your business needs focus in key areas' };
+            }
+
+            getIndustryContext() {
+                const contexts = {
+                    services: {
+                        name: 'service-based businesses',
+                        growthContext: 'client acquisition and retention',
+                        profitContext: 'billable hours and service pricing',
+                        typicalMargin: 15,
+                        contextPrefix: 'For service businesses like yours, '
+                    },
+                    retail: {
+                        name: 'retail and e-commerce businesses',
+                        growthContext: 'inventory turnover and customer traffic',
+                        profitContext: 'cost of goods sold and pricing strategy',
+                        typicalMargin: 20,
+                        contextPrefix: 'In retail and e-commerce, '
+                    },
+                    hospitality: {
+                        name: 'hospitality businesses',
+                        growthContext: 'customer volume and repeat business',
+                        profitContext: 'food costs and operational efficiency',
+                        typicalMargin: 10,
+                        contextPrefix: 'For hospitality businesses, '
+                    },
+                    local: {
+                        name: 'local service businesses',
+                        growthContext: 'community reputation and word-of-mouth',
+                        profitContext: 'local competition and overhead costs',
+                        typicalMargin: 12,
+                        contextPrefix: 'For local businesses, '
+                    },
+                    digital: {
+                        name: 'digital and online businesses',
+                        growthContext: 'user acquisition and conversion rates',
+                        profitContext: 'digital marketing costs and scalability',
+                        typicalMargin: 25,
+                        contextPrefix: 'For digital businesses, '
+                    },
+                    other: {
+                        name: 'businesses',
+                        growthContext: 'market conditions and customer demand',
+                        profitContext: 'operational efficiency and cost management',
+                        typicalMargin: 15,
+                        contextPrefix: 'For businesses like yours, '
+                    }
+                };
+                
+                return contexts[this.industry] || contexts['other'];
+            }
+
+            generateInsights() {
+                const growth = this.calculateGrowthRate();
+                const margin = this.calculateProfitMargin();
+                const customerScore = this.calculateCustomerScore();
+                const industry = this.getIndustryContext();
+                
+                const insights = [];
+                
+                // Revenue growth insight
+                if (growth >= 10) {
+                    insights.push({
+                        icon: 'trending-up',
+                        title: 'Strong Revenue Growth',
+                        description: `${industry.contextPrefix}your revenue grew by ${growth.toFixed(1)}% this month. This is excellent growth that shows your business is expanding.`
+                    });
+                } else if (growth >= 0) {
+                    insights.push({
+                        icon: 'trending-up',
+                        title: 'Positive Revenue Growth',
+                        description: `${industry.contextPrefix}your revenue grew by ${growth.toFixed(1)}% this month. While positive, consider strategies to accelerate ${industry.growthContext}.`
+                    });
+                } else {
+                    insights.push({
+                        icon: 'trending-down',
+                        title: 'Revenue Decline',
+                        description: `${industry.contextPrefix}your revenue decreased by ${Math.abs(growth).toFixed(1)}% this month. This warrants attention to understand the cause.`
+                    });
+                }
+                
+                // Profit margin insight
+                if (margin >= industry.typicalMargin + 5) {
+                    insights.push({
+                        icon: 'dollar-sign',
+                        title: 'Healthy Profit Margins',
+                        description: `Your profit margin is ${margin.toFixed(1)}%, which is strong for ${industry.name}. You're managing ${industry.profitContext} well.`
+                    });
+                } else if (margin >= industry.typicalMargin) {
+                    insights.push({
+                        icon: 'dollar-sign',
+                        title: 'Moderate Profit Margins',
+                        description: `Your profit margin is ${margin.toFixed(1)}%, which is typical for ${industry.name}. There may be opportunities to improve ${industry.profitContext}.`
+                    });
+                } else if (margin >= 0) {
+                    insights.push({
+                        icon: 'alert-triangle',
+                        title: 'Low Profit Margins',
+                        description: `Your profit margin is ${margin.toFixed(1)}%. This is lower than typical for ${industry.name}. Review your ${industry.profitContext} to improve profitability.`
+                    });
+                } else {
+                    insights.push({
+                        icon: 'alert-circle',
+                        title: 'Operating at a Loss',
+                        description: `You're currently losing money. Focus on either increasing revenue or reducing expenses related to ${industry.profitContext} to achieve profitability.`
+                    });
+                }
+                
+                // Customer satisfaction insight
+                if (this.reviewRating >= 4.5) {
+                    insights.push({
+                        icon: 'star',
+                        title: 'Excellent Customer Satisfaction',
+                        description: `With a ${this.reviewRating.toFixed(1)}-star rating, your customers are very satisfied. This is a valuable asset for growth.`
+                    });
+                } else if (this.reviewRating >= 4.0) {
+                    insights.push({
+                        icon: 'star',
+                        title: 'Good Customer Satisfaction',
+                        description: `Your ${this.reviewRating.toFixed(1)}-star rating shows customers are generally happy. Look for patterns in lower ratings.`
+                    });
+                } else {
+                    insights.push({
+                        icon: 'message-square',
+                        title: 'Customer Satisfaction Opportunity',
+                        description: `With a ${this.reviewRating.toFixed(1)}-star rating, there's room to improve the customer experience.`
+                    });
+                }
+                
+                return insights;
+            }
+
+            generateRecommendations() {
+                const growth = this.calculateGrowthRate();
+                const margin = this.calculateProfitMargin();
+                const industry = this.getIndustryContext();
+                const recommendations = [];
+                
+                // Growth recommendations
+                if (growth < 5) {
+                    if (growth < 0) {
+                        recommendations.push({
+                            priority: 'high',
+                            title: 'Address Revenue Decline',
+                            description: `Review recent changes that may have impacted ${industry.growthContext}. Consider customer feedback, market conditions, or competitive factors specific to ${industry.name}.`
+                        });
+                    } else {
+                        recommendations.push({
+                            priority: 'medium',
+                            title: 'Accelerate Growth',
+                            description: `Explore initiatives focused on ${industry.growthContext}. Consider marketing, customer retention strategies, or improvements to your offerings.`
+                        });
+                    }
+                }
+                
+                // Profit recommendations
+                if (margin < industry.typicalMargin) {
+                    if (margin < 0) {
+                        recommendations.push({
+                            priority: 'high',
+                            title: 'Achieve Profitability',
+                            description: `Focus on immediate actions: reduce expenses related to ${industry.profitContext}, review pricing, or increase sales volume to cover costs.`
+                        });
+                    } else {
+                        recommendations.push({
+                            priority: 'medium',
+                            title: 'Improve Profit Margins',
+                            description: `Analyze your ${industry.profitContext} and consider efficiency improvements or strategic price adjustments typical for ${industry.name}.`
+                        });
+                    }
+                }
+                
+                // Customer recommendations
+                if (this.reviewRating < 4.0 || this.reviewCount < 10) {
+                    recommendations.push({
+                        priority: 'low',
+                        title: 'Strengthen Customer Relationships',
+                        description: 'Actively seek customer feedback, address concerns promptly, and encourage satisfied customers to leave reviews.'
+                    });
+                }
+                
+                // If no recommendations were added, business is doing well
+                if (recommendations.length === 0) {
+                    recommendations.push({
+                        priority: 'low',
+                        title: 'Keep Up the Great Work!',
+                        description: 'Your business is showing healthy signs across all key metrics. Continue focusing on what\'s working well and maintain your current strategies.'
+                    });
+                }
+                
+                return recommendations.slice(0, 2); // Limit to 2 recommendations as per requirements
+            }
+
+            generateNextSteps() {
+                const growth = this.calculateGrowthRate();
+                const margin = this.calculateProfitMargin();
+                const industry = this.getIndustryContext();
+                const nextSteps = [];
+                const targetRating = Math.min(5.0, this.reviewRating + 0.5);
+                const targetGrowth = Math.max(5.0, growth + 3.0);
+                const targetMargin = Math.max(industry.typicalMargin, margin + 5.0);
+
+                // Revenue growth next steps
+                if (growth < 5) {
+                    if (growth < 0) {
+                        nextSteps.push({
+                            area: 'Revenue Recovery',
+                            steps: [
+                                'Reach out to <strong>5 past clients</strong> this week to recover ' + Math.abs(growth).toFixed(1) + '% decline',
+                                'Increase monthly revenue by <strong>$' + Math.max(500, this.revenue * 0.1).toFixed(0) + '</strong> to achieve ' + targetGrowth.toFixed(1) + '% growth',
+                                industry === 'services' ? 'Create <strong>2 new service packages</strong> to increase average client value by <strong>15%</strong>' :
+                                industry === 'retail' ? 'Run promotion on <strong>top 3 products</strong> to boost sales by <strong>20%</strong>' :
+                                industry === 'hospitality' ? 'Add <strong>1 new menu item</strong> to increase average check by <strong>$5</strong>' :
+                                industry === 'local' ? 'Host <strong>1 community event</strong> to attract <strong>10 new customers</strong>' :
+                                industry === 'digital' ? 'Optimize conversion rate to increase revenue by <strong>$' + Math.max(300, this.revenue * 0.05).toFixed(0) + '</strong>' :
+                                'Adjust pricing strategy to increase revenue by <strong>' + targetGrowth.toFixed(1) + '%</strong>'
+                            ]
+                        });
+                    } else {
+                        nextSteps.push({
+                            area: 'Growth Acceleration',
+                            steps: [
+                                'Post <strong>3 targeted social media updates</strong> to reach ' + targetGrowth.toFixed(1) + '% growth',
+                                'Acquire <strong>3 new clients</strong> this month to increase revenue by <strong>$' + Math.max(300, this.revenue * 0.08).toFixed(0) + '</strong>',
+                                industry === 'services' ? 'Upgrade <strong>3 top clients</strong> to premium packages for <strong>25%</strong> revenue increase' :
+                                industry === 'retail' ? 'Launch <strong>1 promotion</strong> to returning customers for <strong>15%</strong> sales boost' :
+                                industry === 'hospitality' ? 'Create loyalty program to increase visits by <strong>20%</strong>' :
+                                industry === 'local' ? 'Partner with <strong>2 complementary businesses</strong> for <strong>10 new referrals</strong>' :
+                                industry === 'digital' ? 'Improve landing page to achieve ' + targetGrowth.toFixed(1) + '% growth rate' :
+                                'Implement referral program to generate <strong>5 new leads</strong> monthly'
+                            ]
+                        });
+                    }
+                }
+
+                // Profit margin next steps
+                if (margin < industry.typicalMargin) {
+                    nextSteps.push({
+                        area: 'Profit Optimization',
+                        steps: [
+                            'Reduce expenses by <strong>$' + Math.max(200, this.expenses * 0.05).toFixed(0) + '</strong> to reach ' + targetMargin.toFixed(1) + '% margin',
+                            'Increase prices by <strong>5%</strong> to improve margin from ' + margin.toFixed(1) + '% to <strong>' + targetMargin.toFixed(1) + '%</strong>',
+                            industry === 'services' ? 'Bundle <strong>2 complementary services</strong> to increase value by <strong>20%</strong>' :
+                            industry === 'retail' ? 'Negotiate with <strong>3 suppliers</strong> for <strong>10%</strong> better terms' :
+                            industry === 'hospitality' ? 'Analyze food costs to save <strong>$' + Math.max(100, this.expenses * 0.03).toFixed(0) + '</strong> monthly' :
+                            industry === 'local' ? 'Review utility usage to cut costs by <strong>5%</strong>' :
+                            industry === 'digital' ? 'Cancel <strong>2 unused subscriptions</strong> to save <strong>$50 monthly</strong>' :
+                            'Track all expenses for <strong>1 week</strong> to find <strong>3 cost-saving opportunities</strong>'
+                        ]
+                    });
+                }
+
+                // Customer satisfaction next steps
+                if (this.reviewRating < 4.0 || this.reviewCount < 10) {
+                    nextSteps.push({
+                        area: 'Customer Experience',
+                        steps: [
+                            'Contact 3 recent customers to improve rating from ' + this.reviewRating.toFixed(1) + ' to <strong>' + targetRating.toFixed(1) + ' stars</strong>',
+                            this.reviewRating < 3.0 ? 'Get 5 new reviews this month to build confidence and improve your ' + this.reviewRating.toFixed(1) + '-star rating' : 'Get 5 new reviews this month to build confidence in your <strong>' + this.reviewRating.toFixed(1) + '-star rating</strong>',
+                            industry === 'services' ? 'Create client satisfaction survey to identify <strong>3 improvement areas</strong>' :
+                            industry === 'retail' ? 'Add product reviews to website to increase trust by <strong>30%</strong>' :
+                            industry === 'hospitality' ? 'Train staff on <strong>1 key service improvement</strong> to boost ratings' :
+                            industry === 'local' ? 'Start loyalty program to increase repeat visits by <strong>25%</strong>' :
+                            industry === 'digital' ? 'Set up automated feedback requests to get <strong>10 reviews monthly</strong>' :
+                            'Respond to all customer reviews within <strong>24 hours</strong> to show engagement'
+                        ]
+                    });
+                }
+
+                // If business is doing well, provide maintenance steps
+                if (nextSteps.length === 0) {
+                    nextSteps.push({
+                        area: 'Maintain Momentum',
+                        steps: [
+                            'Document <strong>3 key success factors</strong> this month to maintain ' + growth.toFixed(1) + '% growth',
+                            'Set <strong>1 new business goal</strong> to reach ' + Math.max(targetGrowth, growth + 2).toFixed(1) + '% growth next month',
+                            industry === 'services' ? 'Schedule quarterly check-ins with <strong>top 5 clients</strong> for retention' :
+                            industry === 'retail' ? 'Plan seasonal promotion to increase sales by <strong>15%</strong>' :
+                            industry === 'hospitality' ? 'Update menu with <strong>2 new items</strong> to increase variety' :
+                            industry === 'local' ? 'Attend <strong>1 networking event</strong> monthly for community presence' :
+                            industry === 'digital' ? 'Backup data and review analytics for optimization opportunities' :
+                            'Create <strong>1-month action plan</strong> to sustain current performance'
+                        ]
+                    });
+                }
+
+                return nextSteps.slice(0, 3); // Limit to 3 areas maximum
+            }
+        }
+
+        // Form submission handler
+        businessForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                revenue: document.getElementById('revenue').value,
+                expenses: document.getElementById('expenses').value,
+                previousRevenue: document.getElementById('previousRevenue').value,
+                reviewCount: document.getElementById('reviewCount').value,
+                reviewRating: document.getElementById('reviewRating').value,
+                industry: document.getElementById('industry').value
+            };
+            
+            analyzeBusinessHealth(formData);
+        });
+
+        // Reset button handler
+        resetButton.addEventListener('click', () => {
+            inputSection.classList.remove('hidden');
+            resultsSection.classList.add('hidden');
+            businessForm.reset();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        function analyzeBusinessHealth(data) {
+            const calculator = new BusinessHealthCalculator(data);
+            
+            // Calculate metrics
+            const healthScore = calculator.calculateOverallHealth();
+            const healthCategory = calculator.getHealthCategory(healthScore);
+            const growthRate = calculator.calculateGrowthRate();
+            const profitMargin = calculator.calculateProfitMargin();
+            const customerScore = calculator.calculateCustomerScore();
+            
+            // Update health score display
+            const healthScoreEl = document.getElementById('healthScore');
+            healthScoreEl.className = `w-32 h-32 mx-auto rounded-full flex items-center justify-center text-white text-4xl font-bold mb-4 scale-in ${healthCategory.class}`;
+            healthScoreEl.textContent = Math.round(healthScore);
+            
+            document.getElementById('healthStatus').textContent = healthCategory.category;
+            document.getElementById('healthDescription').textContent = healthCategory.description;
+            
+            // Update metrics
+            updateMetric('growthRate', `${growthRate >= 0 ? '+' : ''}${growthRate.toFixed(1)}%`);
+            updateMetric('profitMargin', `${profitMargin.toFixed(1)}%`);
+            updateMetric('reviewScore', `${data.reviewRating}/5 (${data.reviewCount} reviews)`);
+            
+            // Update indicators
+            updateIndicator('growthIndicator', growthRate >= 5 ? 'Positive' : growthRate >= 0 ? 'Stable' : 'Declining', 
+                            growthRate >= 5 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 
+                            growthRate >= 0 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' : 
+                            'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200');
+            
+            updateIndicator('profitIndicator', profitMargin >= 15 ? 'Healthy' : profitMargin >= 5 ? 'Moderate' : 'Low',
+                            profitMargin >= 15 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                            profitMargin >= 5 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                            'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200');
+            
+            updateIndicator('reviewIndicator', 
+                // Need at least 5 reviews for "Excellent", 3 for "Good"
+                data.reviewCount < 3 ? 'Limited Data' :
+                data.reviewRating >= 4.5 && data.reviewCount >= 5 ? 'Excellent' : 
+                data.reviewRating >= 4.0 && data.reviewCount >= 3 ? 'Good' : 
+                data.reviewRating >= 3.0 ? 'Fair' : 'Needs Work',
+                data.reviewCount < 3 ? 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' :
+                data.reviewRating >= 4.5 && data.reviewCount >= 5 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                data.reviewRating >= 4.0 && data.reviewCount >= 3 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                data.reviewRating >= 3.0 ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' :
+                'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200');
+            
+            // Update chart
+            updateRevenueChart(data.previousRevenue, data.revenue);
+            
+            // Update insights and recommendations
+            updateInsights(calculator.generateInsights());
+            updateRecommendations(calculator.generateRecommendations());
+            updateNextSteps(calculator.generateNextSteps());
+            
+            // Record this analysis for global impact tracking
+            impactTracker.recordAnalysis(data.revenue);
+            
+            // Show results
+            inputSection.classList.add('hidden');
+            resultsSection.classList.remove('hidden');
+            
+            // Re-initialize Lucide icons for new content
+            lucide.createIcons();
+            
+            // Scroll to top smoothly
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateMetric(id, value) {
+            document.getElementById(id).textContent = value;
+        }
+
+        function updateIndicator(id, text, className) {
+            const element = document.getElementById(id);
+            element.textContent = text;
+            element.className = `text-sm font-medium px-2 py-1 rounded-full ${className}`;
+        }
+
+        function updateRevenueChart(prevRevenue, currRevenue) {
+            const prev = parseFloat(prevRevenue);
+            const curr = parseFloat(currRevenue);
+            const maxRevenue = Math.max(prev, curr);
+            
+            const prevBar = document.getElementById('prevRevenueBar');
+            const currBar = document.getElementById('currRevenueBar');
+            
+            // Use pixel heights (max 160px for the chart area)
+            const maxHeight = 160;
+            const prevHeight = maxRevenue > 0 ? (prev / maxRevenue) * maxHeight : 20;
+            const currHeight = maxRevenue > 0 ? (curr / maxRevenue) * maxHeight : 20;
+            
+            prevBar.style.height = `${Math.max(prevHeight, 4)}px`;
+            currBar.style.height = `${Math.max(currHeight, 4)}px`;
+            
+            document.getElementById('prevRevenueLabel').textContent = `$${prev.toLocaleString()}`;
+            document.getElementById('currRevenueLabel').textContent = `$${curr.toLocaleString()}`;
+        }
+
+        function updateInsights(insights) {
+            const container = document.getElementById('insights');
+            container.innerHTML = insights.map(insight => `
+                <div class="flex items-start space-x-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 accent-bg rounded-lg flex items-center justify-center">
+                            <i data-lucide="${insight.icon}" class="w-5 h-5 text-white"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-1">${insight.title}</h4>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">${insight.description}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateRecommendations(recommendations) {
+            const container = document.getElementById('recommendations');
+            container.innerHTML = recommendations.map(rec => `
+                <div class="flex items-start space-x-4 p-4 border-l-4 ${
+                    rec.priority === 'high' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' :
+                    rec.priority === 'medium' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' :
+                    'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                } rounded-lg">
+                    <div class="flex-shrink-0">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            rec.priority === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                            rec.priority === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                            'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                        }">
+                            ${rec.priority === 'high' ? 'High Priority' : rec.priority === 'medium' ? 'Medium Priority' : 'Low Priority'}
+                        </span>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-1">${rec.title}</h4>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">${rec.description}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateNextSteps(nextSteps) {
+            const container = document.getElementById('nextSteps');
+            container.innerHTML = nextSteps.map(area => `
+                <div class="border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                    <h4 class="font-semibold mb-3 text-blue-800 dark:text-blue-200">${area.area}</h4>
+                    <ul class="space-y-3">
+                        ${area.steps.map((step, index) => `
+                            <li class="flex items-start space-x-3">
+                                <span class="text-lg font-bold text-blue-600 dark:text-blue-400 flex-shrink-0 w-6">${index + 1}</span>
+                                <span class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">${step}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `).join('');
+        }
+
+        // Add smooth scroll behavior
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Add input animations
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('scale-in');
+            });
+            
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('scale-in');
+            });
+        });
+
+        // Initialize impact display
+        impactTracker.updateDisplay();
+
+        // Next Steps toggle functionality
+        const toggleNextSteps = document.getElementById('toggleNextSteps');
+        const nextStepsContent = document.getElementById('nextStepsContent');
+        let isNextStepsCollapsed = false;
+
+        toggleNextSteps.addEventListener('click', () => {
+            isNextStepsCollapsed = !isNextStepsCollapsed;
+            
+            if (isNextStepsCollapsed) {
+                nextStepsContent.style.display = 'none';
+                toggleNextSteps.innerHTML = '<i data-lucide="chevron-down" class="w-5 h-5"></i>';
+            } else {
+                nextStepsContent.style.display = 'block';
+                toggleNextSteps.innerHTML = '<i data-lucide="chevron-up" class="w-5 h-5"></i>';
+            }
+            
+            // Re-initialize Lucide icons for the toggle button
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
