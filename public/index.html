@@ -981,11 +981,13 @@
         // Initialize impact display
         impactTracker.updateDisplay();
 
-        // Next Steps toggle functionality - ensure it runs after DOM is ready
+        // Next Steps toggle functionality - declare variable outside timeout
+        let isNextStepsCollapsed = false;
+        
+        // Use setTimeout to ensure DOM is ready
         setTimeout(() => {
             const toggleNextSteps = document.getElementById('toggleNextSteps');
             const nextStepsContent = document.getElementById('nextStepsContent');
-            let isNextStepsCollapsed = false;
 
             if (toggleNextSteps && nextStepsContent) {
                 toggleNextSteps.addEventListener('click', () => {
@@ -1005,9 +1007,11 @@
             }
         }, 100);
 
-        // Copy AI Prompt functionality
-        const copyAIPrompt = document.getElementById('copyAIPrompt');
-        copyAIPrompt.addEventListener('click', () => {
+        // Copy AI Prompt functionality - also use timeout to ensure DOM is ready
+        setTimeout(() => {
+            const copyAIPrompt = document.getElementById('copyAIPrompt');
+            if (copyAIPrompt) {
+                copyAIPrompt.addEventListener('click', () => {
             // Get the current business data from the last analysis
             const revenue = document.getElementById('revenue').value || 'Not provided';
             const expenses = document.getElementById('expenses').value || 'Not provided';
@@ -1056,7 +1060,9 @@ Please tailor your advice specifically for my industry (${industry}) and current
                 // Show error notification
                 showNotification('Failed to copy to clipboard', 'error');
             });
-        });
+                });
+            }
+        }, 100);
 
         // Simple notification function
         function showNotification(message, type) {
