@@ -300,10 +300,13 @@
                 </div>
             </div>
 
-            <!-- Action Button -->
-            <div class="text-center mt-8">
+            <!-- Action Buttons -->
+            <div class="text-center mt-8 space-y-4">
                 <button id="resetButton" class="accent-bg text-white px-8 py-3 rounded-lg font-semibold hover-lift transition-all">
                     Start New Analysis
+                </button>
+                <button id="copyAIPrompt" class="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-lg font-semibold hover-lift transition-all">
+                    Copy AI Prompt
                 </button>
             </div>
         </section>
@@ -996,6 +999,78 @@
             
             // Re-initialize Lucide icons for the toggle button
             lucide.createIcons();
+        });
+
+        // Copy AI Prompt functionality
+        const copyAIPrompt = document.getElementById('copyAIPrompt');
+        copyAIPrompt.addEventListener('click', () => {
+            // Get the current business data from the last analysis
+            const revenue = document.getElementById('revenue').value || 'Not provided';
+            const expenses = document.getElementById('expenses').value || 'Not provided';
+            const previousRevenue = document.getElementById('previousRevenue').value || 'Not provided';
+            const reviewCount = document.getElementById('reviewCount').value || 'Not provided';
+            const reviewRating = document.getElementById('reviewRating').value || 'Not provided';
+            const industry = document.getElementById('industry').value || 'Not specified';
+            
+            // Calculate derived metrics
+            const profitMargin = revenue !== 'Not provided' && expenses !== 'Not provided' 
+                ? ((parseFloat(revenue) - parseFloat(expenses)) / parseFloat(revenue) * 100).toFixed(1)
+                : 'Not calculable';
+            const growthRate = revenue !== 'Not provided' && previousRevenue !== 'Not provided'
+                ? ((parseFloat(revenue) - parseFloat(previousRevenue)) / parseFloat(previousRevenue) * 100).toFixed(1)
+                : 'Not calculable';
+            
+            // Create the AI prompt
+            const aiPrompt = `I need detailed business advice for my small business. Here are my current metrics:
+
+BUSINESS OVERVIEW:
+- Industry: ${industry}
+- Monthly Revenue: $${revenue}
+- Monthly Expenses: $${expenses}
+- Previous Month Revenue: $${previousRevenue}
+- Customer Reviews: ${reviewCount} reviews with ${reviewRating}/5 average rating
+- Profit Margin: ${profitMargin}%
+- Revenue Growth Rate: ${growthRate}%
+
+REQUESTED ANALYSIS:
+Please provide a comprehensive business strategy with specific, actionable recommendations for:
+
+1. Revenue Growth Strategies
+2. Cost Optimization Opportunities
+3. Customer Retention & Satisfaction Improvement
+4. Competitive Positioning
+5. Short-term (30 days) and Long-term (90 days) action plans
+
+Please tailor your advice specifically for my industry (${industry}) and current business metrics. Focus on practical steps I can implement immediately with limited resources.`;
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(aiPrompt).then(() => {
+                // Change button text temporarily to show success
+                const originalText = copyAIPrompt.textContent;
+                copyAIPrompt.textContent = 'Copied!';
+                copyAIPrompt.classList.add('bg-green-600', 'hover:bg-green-700');
+                copyAIPrompt.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+                
+                // Revert after 2 seconds
+                setTimeout(() => {
+                    copyAIPrompt.textContent = originalText;
+                    copyAIPrompt.classList.remove('bg-green-600', 'hover:bg-green-700');
+                    copyAIPrompt.classList.add('bg-gray-600', 'hover:bg-gray-700');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy AI prompt:', err);
+                // Show error feedback
+                const originalText = copyAIPrompt.textContent;
+                copyAIPrompt.textContent = 'Failed to copy';
+                copyAIPrompt.classList.add('bg-red-600', 'hover:bg-red-700');
+                copyAIPrompt.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+                
+                setTimeout(() => {
+                    copyAIPrompt.textContent = originalText;
+                    copyAIPrompt.classList.remove('bg-red-600', 'hover:bg-red-700');
+                    copyAIPrompt.classList.add('bg-gray-600', 'hover:bg-gray-700');
+                }, 2000);
+            });
         });
     </script>
 </body>
