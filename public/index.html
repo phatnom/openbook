@@ -437,7 +437,7 @@
                     const formattedRevenue = revenue >= 1000000 ? `$${(revenue / 1000000).toFixed(1)}M+` :
                                          revenue >= 1000 ? `$${(revenue / 1000).toFixed(0)}K+` :
                                          `$${revenue.toLocaleString()}+`;
-                    impactElement.innerHTML = `To date, OpenBooked has processed an estimated ${formattedRevenue} in monthly revenue data working with ${this.totalAnalyses} ${businessesText}.`;
+                    impactElement.innerHTML = `To date, OpenBooked has processed an estimated ${formattedRevenue} in monthly revenue data for ${this.totalAnalyses} (small) ${businessesText}.`;
                 }
             }
         }
@@ -1126,6 +1126,7 @@ Please tailor your advice specifically for my industry (${industry}) and current
     </script>
 </body>
 </html>
+
 
 
 
