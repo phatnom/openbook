@@ -432,12 +432,12 @@
             updateDisplay() {
                 const impactElement = document.getElementById('impactMetric');
                 if (impactElement) {
-                    const businessesText = this.totalAnalyses === 1 ? 'small business' : 'small businesses';
+                    const businessesText = this.totalAnalyses === 1 ? 'business' : 'businesses';
                     const revenue = this.totalRevenue || 0;
                     const formattedRevenue = revenue >= 1000000 ? `$${(revenue / 1000000).toFixed(1)}M+` :
                                          revenue >= 1000 ? `$${(revenue / 1000).toFixed(0)}K+` :
                                          `$${revenue.toLocaleString()}+`;
-                    impactElement.innerHTML = `To date, OpenBooked has processed ${formattedRevenue} in monthly revenue data from ${this.totalAnalyses} ${businessesText}.`;
+                    impactElement.innerHTML = `To date, OpenBooked has processed an estimated ${formattedRevenue} in monthly revenue data working with ${this.totalAnalyses} ${businessesText}.`;
                 }
             }
         }
@@ -1126,6 +1126,7 @@ Please tailor your advice specifically for my industry (${industry}) and current
     </script>
 </body>
 </html>
+
 
 
 
