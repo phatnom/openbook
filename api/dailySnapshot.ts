@@ -14,6 +14,7 @@ export default async function handler() {
     body: JSON.stringify({
       totalUsers: stats.totalAnalyses || 0,
       totalRevenue: stats.totalRevenue || 0,
+      totalVisitors: stats.totalVisitors || 0,
     }),
   });
 
