@@ -8,10 +8,13 @@ const redis = new Redis({
 module.exports = async function handler(req, res) {
   if (req.method === 'GET') {
     try {
+      // Increment visitor count on each page load
+      await redis.hincrby('impact-stats', 'totalVisitors', 1);
+      
       const stats = await redis.hgetall('impact-stats');
-      return res.status(200).json(stats || { totalAnalyses: 0, totalRevenue: 0 });
+      return res.status(200).json(stats || { totalAnalyses: 0, totalRevenue: 0, totalVisitors: 0 });
     } catch (error) {
-      return res.status(200).json({ totalAnalyses: 0, totalRevenue: 0 });
+      return res.status(200).json({ totalAnalyses: 0, totalRevenue: 0, totalVisitors: 0 });
     }
   } else if (req.method === 'POST') {
     try {
