@@ -442,7 +442,7 @@
                     const formattedRevenue = revenue >= 1000000 ? `$${(revenue / 1000000).toFixed(1)}M+` :
                                          revenue >= 1000 ? `$${(revenue / 1000).toFixed(0)}K+` :
                                          `$${revenue.toLocaleString()}+`;
-                    impactElement.innerHTML = `To date, OpenBooked has processed ${formattedRevenue} in monthly revenue data from ${this.totalAnalyses} ${businessesText} and ${this.totalVisitors} total users`;
+                    impactElement.innerHTML = `To date, OpenBooked has processed ${formattedRevenue} in monthly revenue data from ${this.totalAnalyses} ${businessesText}.`;
                 }
             }
         }
@@ -1131,6 +1131,5 @@ Please tailor your advice specifically for my industry (${industry}) and current
     </script>
 </body>
 </html>
-
 
 
