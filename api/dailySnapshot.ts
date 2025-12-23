@@ -12,7 +12,7 @@ export default async function handler() {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      totalUsers: stats.totalUsers || 0,
+      totalUsers: stats.totalAnalyses || 0,
       totalRevenue: stats.totalRevenue || 0,
     }),
   });
