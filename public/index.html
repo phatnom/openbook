@@ -130,9 +130,18 @@
             transform: scaleY(1.05);
             transform-origin: bottom;
         }
+
+        #toggleExamples {
+            margin-top: 1rem !important;
+        }
+
+        #businessForm button[type="submit"] {
+            margin-top: 1.5rem !important;
+            margin-bottom: 0 !important;
+        }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 min-h-screen flex flex-col">
     <!-- Header -->
     <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div class="max-w-4xl mx-auto px-4 py-4">
@@ -154,7 +163,7 @@
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-4xl mx-auto px-4 py-8">
+    <main class="max-w-4xl mx-auto px-4 py-8 flex-1 flex items-center justify-center">
         <!-- Input Section -->
         <section id="inputSection" class="fade-in">
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
@@ -164,21 +173,21 @@
                 <form id="businessForm" class="space-y-6">
                     <div class="grid md:grid-cols-2 gap-6">
                         <div class="space-y-2">
-                            <label for="revenue" class="block text-sm font-medium">Monthly Revenue (rough estimate $)</label>
+                            <label for="revenue" class="block text-sm font-medium">Monthly Revenue ($)</label>
                             <input type="number" id="revenue" required min="0" max="5000000" step="0.01" 
                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-opacity-50 accent-border transition-all"
                                    placeholder="5,000">
                         </div>
                         
                         <div class="space-y-2">
-                            <label for="expenses" class="block text-sm font-medium">Monthly Expenses (approximate $)</label>
+                            <label for="expenses" class="block text-sm font-medium">Monthly Expenses ($)</label>
                             <input type="number" id="expenses" required min="0" max="5000000" step="0.01"
                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-opacity-50 accent-border transition-all"
                                    placeholder="3,000">
                         </div>
                         
                         <div class="space-y-2">
-                            <label for="previousRevenue" class="block text-sm font-medium">Previous Month Revenue (rough estimate $)</label>
+                            <label for="previousRevenue" class="block text-sm font-medium">Previous Month Revenue ($)</label>
                             <input type="number" id="previousRevenue" required min="0" max="5000000" step="0.01"
                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-opacity-50 accent-border transition-all"
                                    placeholder="4,500">
@@ -197,34 +206,40 @@
                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-opacity-50 accent-border transition-all"
                                    placeholder="4.5">
                         </div>
+                        
+                        <div class="space-y-2">
+                            <label for="industry" class="block text-sm font-medium">Industry (Optional)</label>
+                            <select id="industry" 
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-opacity-50 accent-border transition-all">
+                                <option value="">Select your industry (optional)</option>
+                                <option value="services">Services (consulting, tutoring, agencies, freelancers)</option>
+                                <option value="retail">Retail / E-commerce</option>
+                                <option value="hospitality">Hospitality (restaurants, cafés, food service)</option>
+                                <option value="local">Local businesses (gyms, salons, clinics, etc.)</option>
+                                <option value="digital">Digital / Online businesses</option>
+                                <option value="other">Other / Prefer not to say</option>
+                            </select>
+                        </div>
                     </div>
                     
-                    <div class="space-y-2">
-                        <label for="industry" class="block text-sm font-medium text-gray-600 dark:text-gray-400">Industry (Optional)</label>
-                        <select id="industry" 
-                                class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-opacity-50 accent-border transition-all">
-                            <option value="">Select your industry (optional)</option>
-                            <option value="services">Services (consulting, tutoring, agencies, freelancers)</option>
-                            <option value="retail">Retail / E-commerce</option>
-                            <option value="hospitality">Hospitality (restaurants, cafés, food service)</option>
-                            <option value="local">Local businesses (gyms, salons, clinics, etc.)</option>
-                            <option value="digital">Digital / Online businesses</option>
-                            <option value="other">Other / Prefer not to say</option>
-                        </select>
+                    <div>
+                        <button type="submit" class="w-full accent-bg text-white py-4 rounded-lg font-semibold hover-lift transition-all">
+                            Analyze My Business Health
+                        </button>
                     </div>
                     
-                    <button type="submit" class="w-full accent-bg text-white py-4 rounded-lg font-semibold hover-lift transition-all">
-                        Analyze My Business Health
-                    </button>
-                    
+                    </form>
+                
+                <div class="pt-0">
                     <!-- Example analyses toggle button -->
-                    <button type="button" id="toggleExamples" class="mt-3 text-base text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-100 flex items-center space-x-2 transition-colors font-medium">
+                    <button type="button" id="toggleExamples" class="text-base text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-100 flex items-center space-x-2 transition-colors font-medium">
                         <i data-lucide="chevron-right" class="w-4 h-4 transition-transform" id="examplesChevron"></i>
-                        <span>Show example analyses</span>
+                        <span>Try a sample analysis</span>
                     </button>
-                    
-                    <!-- Hidden example buttons container -->
-                    <div id="examplesContainer" class="hidden mt-3">
+                </div>
+                
+                <!-- Hidden example buttons container -->
+                <div id="examplesContainer" class="hidden mt-3">
                         <div class="grid grid-cols-3 gap-2">
                             <button type="button" id="examplePoor" class="bg-white dark:bg-gray-600 border border-gray-300 dark:border-0 hover:!bg-red-500 hover:!border-red-500 hover:!text-white text-gray-700 dark:text-white py-2 px-3 rounded-lg font-medium text-sm hover-lift transition-all">
                                 Needs Attention
@@ -874,11 +889,11 @@
             
             if (examplesVisible) {
                 examplesContainer.classList.remove('hidden');
-                toggleExamples.querySelector('span').textContent = 'Hide example analyses';
+                toggleExamples.querySelector('span').textContent = 'Hide sample analysis';
                 toggleExamples.style.setProperty('--chevron-rotation', '90deg');
             } else {
                 examplesContainer.classList.add('hidden');
-                toggleExamples.querySelector('span').textContent = 'Show example analyses';
+                toggleExamples.querySelector('span').textContent = 'Try a sample analysis';
                 toggleExamples.style.setProperty('--chevron-rotation', '0deg');
             }
         });
@@ -892,7 +907,7 @@
             // Reset examples visibility and chevron
             examplesVisible = false;
             examplesContainer.classList.add('hidden');
-            toggleExamples.querySelector('span').textContent = 'Show example analyses';
+            toggleExamples.querySelector('span').textContent = 'Try a sample analysis';
             toggleExamples.style.setProperty('--chevron-rotation', '0deg');
             
             // Re-initialize chevron after icons are recreated
@@ -1090,13 +1105,13 @@
                 <div class="flex items-start space-x-4 p-4 border-l-4 ${
                     rec.priority === 'high' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' :
                     rec.priority === 'medium' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' :
-                    'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                    'border-green-500 bg-green-50 dark:bg-green-900/20'
                 } rounded-lg">
                     <div class="flex-shrink-0">
                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                             rec.priority === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
                             rec.priority === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-                            'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                            'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                         }">
                             ${rec.priority === 'high' ? 'High Priority' : rec.priority === 'medium' ? 'Medium Priority' : 'Low Priority'}
                         </span>
@@ -1152,10 +1167,10 @@
         function initializeChevronState() {
             if (examplesVisible) {
                 toggleExamples.style.setProperty('--chevron-rotation', '90deg');
-                toggleExamples.querySelector('span').textContent = 'Hide example analyses';
+                toggleExamples.querySelector('span').textContent = 'Hide sample analysis';
             } else {
                 toggleExamples.style.setProperty('--chevron-rotation', '0deg');
-                toggleExamples.querySelector('span').textContent = 'Show example analyses';
+                toggleExamples.querySelector('span').textContent = 'Try a sample analysis';
             }
         }
 
