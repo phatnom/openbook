@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/dailySnapshot",
-      "schedule": "45 21 * * *"
+      "schedule": "0 9,21 * * *"
     }
   ]
 }
